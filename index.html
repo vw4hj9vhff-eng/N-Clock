@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reykjavik Clock (UTC+0)</title>
+  <style>
+    :root { color-scheme: dark; }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #000;
+      overflow: hidden;
+    }
+
+    /* Center everything */
+    .wrap {
+      height: 100%;
+      display: grid;
+      place-items: center;
+    }
+
+    /* The clock scales with the viewport */
+    .clock {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      color: #fff;
+
+      /* Responsive font sizing: adjust the multipliers to taste */
+      font-size: min(18vw, 22vh);
+      user-select: none;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+
+    /* Blinkers (the colons) */
+    .blinker {
+      display: inline-block;
+      width: 0.7ch; /* keep spacing stable when invisible */
+      text-align: center;
+      opacity: 1;
+      transition: opacity 120ms linear;
+    }
+
+    .blinker.off { opacity: 0; }
+
+    /* Optional: subtle glow (remove if you want totally flat) */
+    .clock {
+      text-shadow: 0 0 12px rgba(255,255,255,0.15);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="clock" aria-label="Reykjavik time">
+      <span id="hh">00</span><span id="c1" class="blinker">:</span><span id="mm">00</span><span id="c2" class="blinker">:</span><span id="ss">00</span>
+    </div>
+  </div>
+
+  <script>
+    const hh = document.getElementById("hh");
+    const mm = document.getElementById("mm");
+    const ss = document.getElementById("ss");
+    const c1 = document.getElementById("c1");
+    const c2 = document.getElementById("c2");
+
+    function pad2(n) { return String(n).padStart(2, "0"); }
+
+    function tick() {
+      // Force Reykjavik as UTC (GMT 0). Iceland has no DST.
+      const now = new Date();
+      const h = now.getUTCHours();
+      const m = now.getUTCMinutes();
+      const s = now.getUTCSeconds();
+
+      hh.textContent = pad2(h);
+      mm.textContent = pad2(m);
+      ss.textContent = pad2(s);
+
+      // Blinkers: toggle each second
+      const on = (s % 2 === 0);
+      c1.classList.toggle("off", !on);
+      c2.classList.toggle("off", !on);
+    }
+
+    // Run immediately and then align updates to the next second boundary
+    tick();
+    (function schedule() {
+      const now = new Date();
+      const msToNextSecond = 1000 - now.getMilliseconds();
+      setTimeout(() => {
+        tick();
+        setInterval(tick, 1000);
+      }, msToNextSecond);
+    })();
+  </script>
+</body>
+</html>
