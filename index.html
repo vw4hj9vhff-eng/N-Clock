@@ -3,59 +3,59 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Reykjavik Clock (UTC+0)</title>
+  <title>N-Clock — Signage</title>
+
   <style>
-    :root { color-scheme: dark; }
     html, body {
       height: 100%;
       margin: 0;
-      background: #000;
+      background: transparent;
       overflow: hidden;
     }
 
-    /* Center everything */
-    .wrap {
+    .stage {
       height: 100%;
       display: grid;
       place-items: center;
     }
 
-    /* The clock scales with the viewport */
     .clock {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
       font-weight: 700;
       line-height: 1;
-      letter-spacing: 0.02em;
+      letter-spacing: 0.03em;
       color: #fff;
 
-      /* Responsive font sizing: adjust the multipliers to taste */
-      font-size: min(18vw, 22vh);
+      /* Big, signage-safe scaling */
+      font-size: min(20vw, 24vh);
+
       user-select: none;
+      will-change: transform;
       -webkit-font-smoothing: antialiased;
       text-rendering: geometricPrecision;
     }
 
-    /* Blinkers (the colons) */
     .blinker {
       display: inline-block;
-      width: 0.7ch; /* keep spacing stable when invisible */
+      width: 0.7ch;
       text-align: center;
       opacity: 1;
-      transition: opacity 120ms linear;
+      transition: opacity 150ms linear;
     }
 
-    .blinker.off { opacity: 0; }
-
-    /* Optional: subtle glow (remove if you want totally flat) */
-    .clock {
-      text-shadow: 0 0 12px rgba(255,255,255,0.15);
+    .blinker.off {
+      opacity: 0;
     }
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="clock" aria-label="Reykjavik time">
-      <span id="hh">00</span><span id="c1" class="blinker">:</span><span id="mm">00</span><span id="c2" class="blinker">:</span><span id="ss">00</span>
+  <div class="stage">
+    <div id="clock" class="clock" aria-label="Reykjavik time">
+      <span id="hh">00</span><span id="c1" class="blinker">:</span>
+      <span id="mm">00</span><span id="c2" class="blinker">:</span>
+      <span id="ss">00</span>
     </div>
   </div>
 
@@ -65,36 +65,43 @@
     const ss = document.getElementById("ss");
     const c1 = document.getElementById("c1");
     const c2 = document.getElementById("c2");
+    const clock = document.getElementById("clock");
 
-    function pad2(n) { return String(n).padStart(2, "0"); }
+    const pad = n => String(n).padStart(2, "0");
 
     function tick() {
-      // Force Reykjavik as UTC (GMT 0). Iceland has no DST.
       const now = new Date();
-      const h = now.getUTCHours();
-      const m = now.getUTCMinutes();
-      const s = now.getUTCSeconds();
+      hh.textContent = pad(now.getUTCHours());
+      mm.textContent = pad(now.getUTCMinutes());
+      ss.textContent = pad(now.getUTCSeconds());
 
-      hh.textContent = pad2(h);
-      mm.textContent = pad2(m);
-      ss.textContent = pad2(s);
-
-      // Blinkers: toggle each second
-      const on = (s % 2 === 0);
-      c1.classList.toggle("off", !on);
-      c2.classList.toggle("off", !on);
+      const blink = now.getUTCSeconds() % 2 === 0;
+      c1.classList.toggle("off", !blink);
+      c2.classList.toggle("off", !blink);
     }
 
-    // Run immediately and then align updates to the next second boundary
-    tick();
-    (function schedule() {
-      const now = new Date();
-      const msToNextSecond = 1000 - now.getMilliseconds();
+    /* Align tick exactly to system second */
+    function startClock() {
+      tick();
+      const delay = 1000 - new Date().getMilliseconds();
       setTimeout(() => {
         tick();
         setInterval(tick, 1000);
-      }, msToNextSecond);
-    })();
+      }, delay);
+    }
+
+    /* Ultra-subtle anti burn-in drift */
+    let dx = 0, dy = 0;
+    function drift() {
+      dx += (Math.random() - 0.5) * 0.6;
+      dy += (Math.random() - 0.5) * 0.6;
+      dx = Math.max(-2, Math.min(2, dx));
+      dy = Math.max(-2, Math.min(2, dy));
+      clock.style.transform = `translate(${dx}px, ${dy}px)`;
+    }
+
+    startClock();
+    setInterval(drift, 30000); // every 30 seconds
   </script>
 </body>
 </html>
