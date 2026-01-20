@@ -6,6 +6,15 @@
   <title>N-Clock — Signage</title>
 
   <style>
+    /* FIGURA — Bold */
+    @font-face {
+      font-family: "Figura";
+      src: url("fonts/Figura-Bold.woff2") format("woff2");
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
     html, body {
       height: 100%;
       margin: 0;
@@ -20,15 +29,14 @@
     }
 
     .clock {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-        "Liberation Mono", "Courier New", monospace;
+      font-family: "Figura", system-ui, sans-serif;
       font-weight: 700;
       line-height: 1;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.06em; /* tuned for Figura */
       color: #fff;
 
-      /* Big, signage-safe scaling */
-      font-size: min(20vw, 24vh);
+      /* Large, signage-safe scaling */
+      font-size: min(26vw, 30vh);
 
       user-select: none;
       will-change: transform;
@@ -38,10 +46,10 @@
 
     .blinker {
       display: inline-block;
-      width: 0.7ch;
+      width: 0.8ch; /* slightly wider colon spacing for Figura */
       text-align: center;
       opacity: 1;
-      transition: opacity 150ms linear;
+      transition: opacity 180ms linear;
     }
 
     .blinker.off {
@@ -53,34 +61,28 @@
 <body>
   <div class="stage">
     <div id="clock" class="clock" aria-label="Reykjavik time">
-      <span id="hh">00</span><span id="c1" class="blinker">:</span>
-      <span id="mm">00</span><span id="c2" class="blinker">:</span>
-      <span id="ss">00</span>
+      <span id="hh">00</span><span id="colon" class="blinker">:</span><span id="mm">00</span>
     </div>
   </div>
 
   <script>
     const hh = document.getElementById("hh");
     const mm = document.getElementById("mm");
-    const ss = document.getElementById("ss");
-    const c1 = document.getElementById("c1");
-    const c2 = document.getElementById("c2");
+    const colon = document.getElementById("colon");
     const clock = document.getElementById("clock");
 
     const pad = n => String(n).padStart(2, "0");
 
     function tick() {
       const now = new Date();
+
       hh.textContent = pad(now.getUTCHours());
       mm.textContent = pad(now.getUTCMinutes());
-      ss.textContent = pad(now.getUTCSeconds());
 
-      const blink = now.getUTCSeconds() % 2 === 0;
-      c1.classList.toggle("off", !blink);
-      c2.classList.toggle("off", !blink);
+      // Blink colon every second
+      colon.classList.toggle("off", now.getUTCSeconds() % 2 !== 0);
     }
 
-    /* Align tick exactly to system second */
     function startClock() {
       tick();
       const delay = 1000 - new Date().getMilliseconds();
@@ -90,7 +92,7 @@
       }, delay);
     }
 
-    /* Ultra-subtle anti burn-in drift */
+    /* Ultra-subtle anti burn-in drift (OLED safe) */
     let dx = 0, dy = 0;
     function drift() {
       dx += (Math.random() - 0.5) * 0.6;
@@ -101,7 +103,7 @@
     }
 
     startClock();
-    setInterval(drift, 30000); // every 30 seconds
+    setInterval(drift, 30000);
   </script>
 </body>
 </html>
