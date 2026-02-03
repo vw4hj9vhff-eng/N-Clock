@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="height=device-width, initial-scale=1" />
   <title>N-Clock — Signage</title>
 
   <style>
@@ -16,27 +16,26 @@
     }
 
     html, body {
-      height: 100%;
       margin: 0;
-      background: transparent;
+      padding: 0;
+      height: 400%;
+      margin: 0;
+      background:transparent;
       overflow: hidden;
     }
 
-    .stage {
-      height: 100%;
-      display: grid;
-      place-items: center;
-    }
+    .stage {}
 
     .clock {
       font-family: "Figura", system-ui, sans-serif;
       font-weight: 700;
       line-height: 1;
-      letter-spacing: 0.06em; /* tuned for Figura */
+      letter-spacing: 0.02em; /* tuned for Figura */
       color: #fff;
+      
 
       /* Large, signage-safe scaling */
-      font-size: min(26vw, 30vh);
+      font-size: min(36vw, 40vh);
 
       user-select: none;
       will-change: transform;
@@ -47,7 +46,7 @@
     .blinker {
       display: inline-block;
       width: 0.8ch; /* slightly wider colon spacing for Figura */
-      text-align: center;
+      text-align: left;
       opacity: 1;
       transition: opacity 180ms linear;
     }
@@ -104,6 +103,9 @@
 
     startClock();
     setInterval(drift, 30000);
+    
+  
   </script>
+  
 </body>
 </html>
